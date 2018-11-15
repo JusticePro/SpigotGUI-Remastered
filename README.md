@@ -1,7 +1,7 @@
 # SpigotGUI Remastered
 SpigotGUI Remastered is an newer edition of <a href="https://spigotmc.org/resources/spigotgui.55266/">SpigotGUI</a>
 <h1>Download</h1>
-There currently isn't a download for this yet.<br>
+You can download it <a href="https://www.spigotmc.org/resources/spigotgui-remastered.62417/">here</a><br>
 <h1>What Langauge Did I use?</h1>
 <h1>Java</h1>
 <h1>What does it do?</h1>
