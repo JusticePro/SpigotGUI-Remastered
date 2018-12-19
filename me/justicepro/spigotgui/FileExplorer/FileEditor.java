@@ -168,6 +168,15 @@ public class FileEditor extends JFrame {
 	 */
 	public void openFile(File file) throws IOException
 	{
+		
+		if (!file.exists()) {
+			FileOutputStream output = new FileOutputStream(file);
+			
+			output.write("".getBytes());
+			output.close();
+			setTitle(file.getName() + " - File Editor");
+		}
+		
 		newFile = false;
 		FileInputStream input = new FileInputStream(file);
 		setTitle(file.getName() + " - File Editor");
@@ -180,7 +189,6 @@ public class FileEditor extends JFrame {
 		}
 		
 		textArea.setText(text);
-		openedFile = file;
 		input.close();
 	}
 	

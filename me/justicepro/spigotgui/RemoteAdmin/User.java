@@ -10,6 +10,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import me.justicepro.spigotgui.RemoteAdmin.Server.RConnection;
+import me.justicepro.spigotgui.RemoteAdmin.Server.RServer;
+
 public class User implements Serializable {
 	
 	/*
@@ -293,6 +296,29 @@ public class User implements Serializable {
 		}
 
 		return user;
+	}
+
+	
+	/**
+	 * If the user is online.
+	 * @param server
+	 * @return
+	 */
+	public boolean isOnline(RServer server) {
+		
+		for (RConnection connection : server.connections) {
+			
+			if (connection.user != null) {
+				
+				if (connection.user.username.equals(username)) {
+					return true;
+				}
+				
+			}
+			
+		}
+		
+		return false;
 	}
 
 }

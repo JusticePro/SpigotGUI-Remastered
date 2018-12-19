@@ -33,7 +33,7 @@ public class ServerHandler extends Module implements PacketHandler {
 
 	public static ArrayList<Console> consoles = new ArrayList<>();
 	private static LocalTime lastCommand;
-	
+
 	/**
 	 * Packet-Handler for the server.
 	 */
@@ -49,11 +49,40 @@ public class ServerHandler extends Module implements PacketHandler {
 		if (packet.getPacketName().equalsIgnoreCase("serverchat_send")) {
 			SendMessage sm = new SendMessage(packet);
 			if (connection.user.hasPermission(CorePermissions.CHAT_SEND)) {
-				for (RConnection c : server.connections) {
+				
+				if (sm.getMessage().startsWith("/") && sm.getMessage().length() >= 2) {
+					String command = sm.getMessage().substring(1);
 
-					if (c.user.hasPermission(CorePermissions.CHAT_READ)) {
-						c.sendPacket(new SendMessage(connection.user.username + ": " + sm.getMessage()));
+					if (command.equalsIgnoreCase("help")) {
+						connection.sendPacket(new SendMessage("Commands:\n/help - Show this help menu\n/list - List users."));
 					}
+
+					if (command.equalsIgnoreCase("list")) {
+						String users = "";
+
+						for (User user : User.users) {
+							
+							if (user.isOnline(server)) {
+								users += "[Online] " + user.username + "\n";
+							}else {
+								users += "[Offline] " + user.username + "\n";
+							}
+							
+						}
+
+						users = users.substring(0, users.length() - 1);
+
+						connection.sendPacket(new SendMessage(users));
+
+					}
+
+				}else {
+					for (RConnection c : server.connections) {
+						if (c.user.hasPermission(CorePermissions.CHAT_READ)) {
+							c.sendPacket(new SendMessage(connection.user.username + ": " + sm.getMessage()));
+						}
+					}
+
 				}
 
 			}
@@ -66,7 +95,7 @@ public class ServerHandler extends Module implements PacketHandler {
 			try {
 
 				if (connection.user.hasPermission(CorePermissions.ALLOW_BOT)) {
-					
+
 					// Credit to SMI (Samaritan Ministries)
 					if (!LocalTime.now().isAfter(lastCommand.plusSeconds(1)) && connection.user.hasPermission(CorePermissions.ALLOW_BOT)) {
 						System.out.println("It hasen't been a second yet. Cancelling Command");
@@ -74,7 +103,7 @@ public class ServerHandler extends Module implements PacketHandler {
 						sendCommand(console.getMessage());
 						lastCommand = LocalTime.now();
 					}
-					
+
 				}
 
 			} catch (ProcessException e) {
@@ -148,7 +177,7 @@ public class ServerHandler extends Module implements PacketHandler {
 			PacketServerStart serverStart = new PacketServerStart(packet);
 
 			if (serverStart.isFunctionalPacket()) {
-				
+
 				if (connection.user.hasPermission(CorePermissions.ADMIN)) {
 					System.out.println("Server_Start is Functional");
 

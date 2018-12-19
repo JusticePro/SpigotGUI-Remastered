@@ -78,6 +78,8 @@ public class RServer extends Thread {
 					if (connection.lastLogin != null) {
 						
 						// Credit to SMI (Samaritan Ministries)
+						// Anti-bruteforce: One login per second.
+						
 						if (!LocalTime.now().isAfter(connection.lastLogin.plusSeconds(1))) {
 							user = null;
 							System.out.println("It hasen't been a second yet. Cancelling Login " + connection.lastLogin);
