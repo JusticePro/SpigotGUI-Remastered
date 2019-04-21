@@ -200,41 +200,30 @@ public class ServerHandler extends Module implements PacketHandler {
 					}
 
 					if (eula.exists()) {
-
-						if (SpigotGUI.jarFile == null) {
-
+						
+						if (SpigotGUI.jarFilePath == null || SpigotGUI.jarFilePath.isEmpty()) {
 							File file = new File("server.jar");
 
-							if (file.exists()) {
-								SpigotGUI.jarFile = file;
+							if (!file.exists()) {
+								System.out.println("Unable to locate server jar file");
+								return;
 							}
-
 						}
-
+						
+						boolean isServerRunning = false;
 						if (SpigotGUI.server != null) {
 							System.out.println("Server_Start is not null");
-							if (!SpigotGUI.server.isRunning() && SpigotGUI.jarFile != null) {
-								System.out.println("Server_Starting");
-								try {
-									SpigotGUI.instance.startServer(serverStart.getArguments(), serverStart.getSwitches());
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-
-							}
-
+							isServerRunning = SpigotGUI.server.isRunning();
 						}else {
 							System.out.println("Server_Start is null");
-							if (SpigotGUI.jarFile != null) {
-								System.out.println("Server_Starting");
-								try {
-									SpigotGUI.instance.startServer(serverStart.getArguments(), serverStart.getSwitches());
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-
+						}
+						if (!isServerRunning) {
+							System.out.println("Server_Starting");
+							try {
+								SpigotGUI.instance.startServer(serverStart.getArguments(), serverStart.getSwitches());
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
 
 						}

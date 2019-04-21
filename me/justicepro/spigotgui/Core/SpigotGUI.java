@@ -124,7 +124,7 @@ public class SpigotGUI extends JFrame {
 	
 	private JCheckBox chckbxConsoleForsay;
 
-	public static File jarFile;
+	public static String jarFilePath;
 
 	public static ServerHandler serverHandler = new ServerHandler();
 
@@ -200,7 +200,7 @@ public class SpigotGUI extends JFrame {
 
 				String theme = themeBox.getItemAt(themeBox.getSelectedIndex());
 				
-				Settings s = new Settings(new ServerSettings(minRam.getValue(), maxRam.getValue(), customArgsTxt.getText(), customSwitchesTxt.getText(), jarFile), settings.getTheme(), fontSpinner.getValue());
+				Settings s = new Settings(new ServerSettings(minRam.getValue(), maxRam.getValue(), customArgsTxt.getText(), customSwitchesTxt.getText(), jarFilePath), settings.getTheme(), fontSpinner.getValue());
 				
 				for (Theme t : Theme.values()) {
 
@@ -1882,7 +1882,12 @@ public class SpigotGUI extends JFrame {
 		JLabel lblCustomSwitches = new JLabel("Custom Switches");
 		lblCustomSwitches.setHorizontalAlignment(SwingConstants.CENTER);
 		
-		JLabel lblJarFile = new JLabel("Server File: server.jar");
+		String jarFileLabelText = "Server File: server.jar";
+		jarFilePath = settings.getServerSettings().getJarFilePath();
+		if (jarFilePath != null && !jarFilePath.isEmpty()){
+			jarFileLabelText = "Server File: " + jarFilePath;
+		}
+		JLabel lblJarFile = new JLabel(jarFileLabelText);
 		lblJarFile.setHorizontalAlignment(SwingConstants.LEFT);
 
 		JButton btnSetJarFile = new JButton("Set Server File");
@@ -1899,8 +1904,8 @@ public class SpigotGUI extends JFrame {
 				int result = fileChooser.showOpenDialog(null);
 
 				if (result==JFileChooser.APPROVE_OPTION) {
-					jarFile = fileChooser.getSelectedFile();
-					lblJarFile.setText("Server File: " + jarFile.getAbsolutePath());
+					jarFilePath = fileChooser.getSelectedFile().getAbsolutePath();
+					lblJarFile.setText("Server File: " + jarFilePath);
 				}
 
 			}
@@ -2383,17 +2388,19 @@ public class SpigotGUI extends JFrame {
 
 		}
 
-		if (jarFile==null) {
+		File jarFile;
+		
+		if (jarFilePath == null || jarFilePath.isEmpty()) {
 
-			File file = new File("server.jar");
+			jarFile = new File("server.jar");
 
-			if (file.exists()) {
-				jarFile = file;
-			}else {
+			if (!jarFile.exists()) {
 				JOptionPane.showMessageDialog(null, "There is no selected jar file. Look at Server Settings.");
 				return;
 			}
 
+		}else {
+			jarFile = new File(jarFilePath);
 		}
 
 		if (!jarFile.exists()) {

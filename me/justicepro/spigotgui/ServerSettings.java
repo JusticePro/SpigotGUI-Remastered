@@ -1,6 +1,5 @@
 package me.justicepro.spigotgui;
 
-import java.io.File;
 import java.io.Serializable;
 
 public class ServerSettings implements Serializable {
@@ -9,15 +8,15 @@ public class ServerSettings implements Serializable {
 	private Object maxRam;
 	private String customArgs;
 	private String customSwitches;
-	private File jarFile;
+	private String jarFilePath;
 	
-	public ServerSettings(Object minRam, Object maxRam, String customArgs, String customSwitches, File jarFile) {
+	public ServerSettings(Object minRam, Object maxRam, String customArgs, String customSwitches, String jarFilePath) {
 		this.minRam = minRam;
 		this.maxRam = maxRam;
 		
 		this.customArgs = customArgs;
 		this.customSwitches = customSwitches;
-		this.jarFile = jarFile;
+		this.jarFilePath = jarFilePath;
 	}
 	
 	public Object getMinRam() {
@@ -36,8 +35,8 @@ public class ServerSettings implements Serializable {
 		return customSwitches;
 	}
 
-	public File getJarFile() {
-		return jarFile;
+	public String getJarFilePath() {
+		return jarFilePath;
 	}
 	
 	public void setCustomArgs(String customArgs) {
@@ -48,10 +47,6 @@ public class ServerSettings implements Serializable {
 		this.customSwitches = customSwitches;
 	}
 	
-	public void setJarFile(File jarFile) {
-		this.jarFile = jarFile;
-	}
-	
 	public void setMaxRam(Object maxRam) {
 		this.maxRam = maxRam;
 	}
@@ -60,8 +55,12 @@ public class ServerSettings implements Serializable {
 		this.minRam = minRam;
 	}
 	
+	public void setJarFilePath(String jarFilePath) {
+		this.jarFilePath = jarFilePath;
+	}
+	
 	public static ServerSettings getDefault() {
-		return new ServerSettings(1024, 1024, "", "", new File("server.jar"));
+		return new ServerSettings(1024, 1024, "", "", "server.jar");
 	}
 	
 }
