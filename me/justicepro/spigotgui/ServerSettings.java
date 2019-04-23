@@ -9,14 +9,16 @@ public class ServerSettings implements Serializable {
 	private String customArgs;
 	private String customSwitches;
 	private String jarFilePath;
+	private boolean useServerHomeDirectory;
 	
-	public ServerSettings(Object minRam, Object maxRam, String customArgs, String customSwitches, String jarFilePath) {
+	public ServerSettings(Object minRam, Object maxRam, String customArgs, String customSwitches, String jarFilePath, boolean useServerHomeDirectory) {
 		this.minRam = minRam;
 		this.maxRam = maxRam;
 		
 		this.customArgs = customArgs;
 		this.customSwitches = customSwitches;
 		this.jarFilePath = jarFilePath;
+		this.useServerHomeDirectory = useServerHomeDirectory;
 	}
 	
 	public Object getMinRam() {
@@ -39,6 +41,10 @@ public class ServerSettings implements Serializable {
 		return jarFilePath;
 	}
 	
+	public boolean getUseServerHomeDirectory() {
+		return useServerHomeDirectory;
+	}
+	
 	public void setCustomArgs(String customArgs) {
 		this.customArgs = customArgs;
 	}
@@ -59,8 +65,12 @@ public class ServerSettings implements Serializable {
 		this.jarFilePath = jarFilePath;
 	}
 	
+	public void setUseServerHomeDirectory(boolean useServerHomeDirectory) {
+		this.useServerHomeDirectory = useServerHomeDirectory;
+	}
+	
 	public static ServerSettings getDefault() {
-		return new ServerSettings(1024, 1024, "", "", "server.jar");
+		return new ServerSettings(1024, 1024, "", "", "server.jar", false);
 	}
 	
 }

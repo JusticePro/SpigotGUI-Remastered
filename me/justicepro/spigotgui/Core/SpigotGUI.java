@@ -22,6 +22,7 @@ import java.net.Inet4Address;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -100,6 +101,8 @@ public class SpigotGUI extends JFrame {
 
 	private JSpinner maxRam;
 	private JSpinner minRam;
+	
+	private JCheckBox chckbxUseServerHomeDir;
 
 	private JLabel lblStatus;
 
@@ -200,7 +203,7 @@ public class SpigotGUI extends JFrame {
 
 				String theme = themeBox.getItemAt(themeBox.getSelectedIndex());
 				
-				Settings s = new Settings(new ServerSettings(minRam.getValue(), maxRam.getValue(), customArgsTxt.getText(), customSwitchesTxt.getText(), jarFilePath), settings.getTheme(), fontSpinner.getValue());
+				Settings s = new Settings(new ServerSettings(minRam.getValue(), maxRam.getValue(), customArgsTxt.getText(), customSwitchesTxt.getText(), jarFilePath, chckbxUseServerHomeDir.isSelected()), settings.getTheme(), fontSpinner.getValue());
 				
 				for (Theme t : Theme.values()) {
 
@@ -1854,6 +1857,8 @@ public class SpigotGUI extends JFrame {
 		JLabel lblMaxRam = new JLabel("Max Ram");
 		lblMaxRam.setHorizontalAlignment(SwingConstants.LEFT);
 
+		chckbxUseServerHomeDir = new JCheckBox("Use server's home directory");
+		
 		customArgsTxt = new JTextField();
 		
 		customArgsTxt.setColumns(10);
@@ -1875,6 +1880,7 @@ public class SpigotGUI extends JFrame {
 		fontSpinner.setValue(settings.getFontSize());
 		customArgsTxt.setText(serverSettings.getCustomArgs());
 		customSwitchesTxt.setText(serverSettings.getCustomSwitches());
+		chckbxUseServerHomeDir.setSelected(serverSettings.getUseServerHomeDirectory());
 		
 		JLabel lblCustomArgs = new JLabel("Custom Arguments");
 		lblCustomArgs.setHorizontalAlignment(SwingConstants.CENTER);
@@ -1918,7 +1924,15 @@ public class SpigotGUI extends JFrame {
 			public void actionPerformed(ActionEvent arg0) {
 				FileEditor fileEditor = new FileEditor();
 				try {
-					fileEditor.openFile(new File("server.properties"));
+					String settingsPath = "";
+
+					if (chckbxUseServerHomeDir.isSelected()) {
+						settingsPath = Paths.get(jarFilePath).getParent().toString();
+					}
+					
+					File settingsFile = new File(Paths.get(settingsPath).resolve("server.properties").toString());
+
+					fileEditor.openFile(settingsFile);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1932,6 +1946,8 @@ public class SpigotGUI extends JFrame {
 			gl_panel_2.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_2.createSequentialGroup()
 					.addComponent(btnSetJarFile, GroupLayout.PREFERRED_SIZE, 110, GroupLayout.PREFERRED_SIZE)
+					.addPreferredGap(ComponentPlacement.RELATED, 350, Short.MAX_VALUE)
+				    .addComponent(chckbxUseServerHomeDir)
 					.addPreferredGap(ComponentPlacement.RELATED, 462, Short.MAX_VALUE)
 					.addComponent(btnEditServerproperties))
 				.addComponent(lblJarFile, GroupLayout.PREFERRED_SIZE, 596, GroupLayout.PREFERRED_SIZE)
@@ -1986,7 +2002,8 @@ public class SpigotGUI extends JFrame {
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(gl_panel_2.createParallelGroup(Alignment.TRAILING)
 						.addComponent(btnSetJarFile, GroupLayout.PREFERRED_SIZE, 20, GroupLayout.PREFERRED_SIZE)
-						.addComponent(btnEditServerproperties)))
+						.addComponent(btnEditServerproperties)
+					    .addComponent(chckbxUseServerHomeDir)))
 		);
 		panel_2.setLayout(gl_panel_2);
 
@@ -2372,22 +2389,7 @@ public class SpigotGUI extends JFrame {
 
 	public void startServer(String args, String switches) throws IOException {
 		consoleTextArea.setText("");
-		File eula = new File("eula.txt");
-
-		if (!eula.exists()) {
-
-			int result = JOptionPane.showOptionDialog(null,
-					"Do you agree to the Minecraft Eula? (https://account.mojang.com/documents/minecraft_eula)", "Message", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
-
-			if (result==JOptionPane.YES_OPTION) {
-				Files.copy(getClass().getResourceAsStream("/eula.txt"), eula.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			}else {
-				JOptionPane.showMessageDialog(null, "You must agree to the eula to run a server.");
-				return;
-			}
-
-		}
-
+		
 		File jarFile;
 		
 		if (jarFilePath == null || jarFilePath.isEmpty()) {
@@ -2407,11 +2409,34 @@ public class SpigotGUI extends JFrame {
 			JOptionPane.showMessageDialog(null, "The selected jar file does not exist.");
 			return;
 		}
+		
+		String eulaPath = "";
+		
+		if (chckbxUseServerHomeDir.isSelected()) {
+			eulaPath = jarFile.getParentFile().getAbsolutePath();
+		}
+		
+		File eula = new File(Paths.get(eulaPath).resolve("eula.txt").toString());
+
+		if (!eula.exists()) {
+
+			int result = JOptionPane.showOptionDialog(null,
+					"Do you agree to the Minecraft Eula? (https://account.mojang.com/documents/minecraft_eula)", "Message", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+
+			if (result==JOptionPane.YES_OPTION) {
+				Files.copy(getClass().getResourceAsStream("/eula.txt"), eula.toPath(), StandardCopyOption.REPLACE_EXISTING);
+			}else {
+				JOptionPane.showMessageDialog(null, "You must agree to the eula to run a server.");
+				return;
+			}
+
+		}
 
 		if (server != null) {
 
 			if (!server.isRunning()) {
 				server = new Server(jarFile, "nogui " + args, switches);
+				server.useServerHomeDir = chckbxUseServerHomeDir.isSelected();
 				try {
 					server.start();
 				} catch (IOException | ProcessException e) {
@@ -2425,6 +2450,7 @@ public class SpigotGUI extends JFrame {
 
 		}else {
 			server = new Server(jarFile, "nogui " + args, switches);
+			server.useServerHomeDir = chckbxUseServerHomeDir.isSelected();
 			try {
 				server.start();
 			} catch (IOException | ProcessException e) {

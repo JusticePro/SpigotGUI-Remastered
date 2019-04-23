@@ -13,10 +13,13 @@ public class Server {
 	
 	private Process process;
 	
+	public boolean useServerHomeDir;
+	
 	public Server(File jar, String arguments, String switches) {
 		this.jar = jar;
 		this.arguments = arguments;
 		this.switches = switches;
+		this.useServerHomeDir = false;
 	}
 	
 	public Thread start(String arguments, String switches) throws IOException, ProcessException {
@@ -30,21 +33,18 @@ public class Server {
 			}
 		}else {
 			System.out.println("Started Server");
-			
+			File jarPath = jar.getParentFile();
+			ProcessBuilder processBuilder;
+
 			if (isWindows) {
-				process = Runtime.getRuntime().exec("cmd");
-
-				//PrintWriter output = new PrintWriter(process.getOutputStream(), true);
-
-//				output.println("java " + switches + " -jar \"" + jar.getAbsolutePath() + "\" " + arguments + " & exit");
-
-
+				processBuilder = new ProcessBuilder("cmd");
 			}else {
-				process = Runtime.getRuntime().exec("sh");
-
-				//PrintWriter output = new PrintWriter(process.getOutputStream(), true);
-
-//				output.println("java " + switches + " -jar \"" + jar.getAbsolutePath() + "\" " + arguments + " & exit");
+				processBuilder = new ProcessBuilder("sh");
+			}
+			if (useServerHomeDir) {
+				process = processBuilder.directory(jarPath).start();
+			}else {
+				process = processBuilder.start();
 			}
 			
 			PrintWriter output = new PrintWriter(process.getOutputStream(), true);
